@@ -49,7 +49,7 @@ namespace Build2017.IoT.Hackathon
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            app.UseCors("CorsPolicy");
             app.UseMvc();
 
             app.UseSwagger();
