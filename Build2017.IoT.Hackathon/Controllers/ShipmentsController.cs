@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using Build2017.IoT.Hackathon.Models;
+using System.Text;
 
 namespace Build2017.IoT.Hackathon.Controllers
 {
@@ -40,6 +41,10 @@ namespace Build2017.IoT.Hackathon.Controllers
 
             TableOperation insertOp = TableOperation.Insert(shipInfo);
             await table.ExecuteAsync(insertOp);
+
+            var iotClient = Microsoft.Azure.Devices.ServiceClient.CreateFromConnectionString(iotHubConnectionstring);
+            var deviceMessage = new Microsoft.Azure.Devices.Message(Encoding.ASCII.GetBytes("StartTrackinig")) { Ack = Microsoft.Azure.Devices.DeliveryAcknowledgement.Full };
+            await iotClient.SendAsync(shipInfo.TrackerId, deviceMessage);
             return true;
         }
 
@@ -58,11 +63,17 @@ namespace Build2017.IoT.Hackathon.Controllers
                 CloudTable dataTable = tableClient.GetTableReference("DeviceData");
                 TableQuery<DeviceData> dataquery = new TableQuery<DeviceData>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, shippingInfo.TrackerId));
                 var resultingData = dataTable.ExecuteQuery(dataquery);
-                return resultingData.ToList().OrderBy(x => x.MessageId);
+                return resultingData.ToList().OrderBy(x => x.Timestamp);
             } else {
                 return null;
             }
 
+        }
+
+        [Route("{shipmentName}/details")]
+        [HttpGet]
+        public async Task<ShipmentDetails> GetShipmentDetails(string shipmentName) {
+            return new ShipmentDetails();
         }
     }
 }
