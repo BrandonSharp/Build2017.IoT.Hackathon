@@ -27,6 +27,14 @@ namespace Build2017.IoT.Hackathon
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+            });
             services.AddSwaggerGen(options => {
                 options.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info {
                     Title = "Shipping Api", Version = "v1"
