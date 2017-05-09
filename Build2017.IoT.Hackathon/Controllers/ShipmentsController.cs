@@ -73,6 +73,23 @@ namespace Build2017.IoT.Hackathon.Controllers
         [Route("{shipmentName}/details")]
         [HttpGet]
         public async Task<ShipmentDetails> GetShipmentDetails(string shipmentName) {
+
+            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+            CloudTable table = tableClient.GetTableReference("Shipments");
+
+            TableOperation getOp = TableOperation.Retrieve<ShipmentInformation>(shipmentName, shipmentName);
+            var shipmentResult = await table.ExecuteAsync(getOp);
+
+            if (shipmentResult.Result != null) {
+                ShipmentInformation shippingInfo = ((ShipmentInformation)shipmentResult.Result);
+
+                CloudTable dataTable = tableClient.GetTableReference("DeviceData");
+                TableQuery<DeviceData> dataquery = new TableQuery<DeviceData>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, shippingInfo.TrackerId));
+                var resultingData = dataTable.ExecuteQuery(dataquery);
+                var results = resultingData.ToList().OrderBy(x => x.Timestamp);
+            } else {
+                return null;
+            }
             return new ShipmentDetails();
         }
     }
