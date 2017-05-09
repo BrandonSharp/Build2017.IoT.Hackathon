@@ -26,22 +26,43 @@ namespace Build2017.IoT.Hackathon.Controllers
         [Route("devices")]
         [HttpGet]
         public IEnumerable<string> GetDeviceIds() {
-            Microsoft.Azure.Devices.ServiceClient.CreateFromConnectionString(iotHubConnectionstring);
+            var iotClient = Microsoft.Azure.Devices.ServiceClient.CreateFromConnectionString(iotHubConnectionstring);
+            
             return null;
         }
 
         [HttpPost]
         public async Task<bool> CreateShipment(ShipmentInformation shipInfo) {
+            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
+            CloudTable table = tableClient.GetTableReference("Shipments");
+
+            shipInfo.RowKey = shipInfo.Name;
+
+            TableOperation insertOp = TableOperation.Insert(shipInfo);
+            await table.ExecuteAsync(insertOp);
             return true;
         }
 
-        [Route("devices/{deviceId}")]
+        [Route("{shipmentName}/devicedata")]
         [HttpGet]
-        public IEnumerable<DeviceData> GetData(string deviceId) {
+        public async Task<IEnumerable<DeviceData>> GetDeviceData(string shipmentName) {
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-            CloudTable table = tableClient.GetTableReference("DeviceData");
+            CloudTable table = tableClient.GetTableReference("Shipments");
 
-            return null;
+            TableOperation getOp = TableOperation.Retrieve<ShipmentInformation>(shipmentName, shipmentName);
+            var shipmentResult = await table.ExecuteAsync(getOp);
+
+            if(shipmentResult.Result != null) {
+                ShipmentInformation shippingInfo = ((ShipmentInformation)shipmentResult.Result);
+
+                CloudTable dataTable = tableClient.GetTableReference("DeviceData");
+                TableQuery<DeviceData> dataquery = new TableQuery<DeviceData>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, shippingInfo.TrackerId));
+                var resultingData = dataTable.ExecuteQuery(dataquery);
+                return resultingData.ToList().OrderBy(x => x.MessageId);
+            } else {
+                return null;
+            }
+
         }
     }
 }
