@@ -27,6 +27,11 @@ namespace Build2017.IoT.Hackathon
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSwaggerGen(options => {
+                options.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info {
+                    Title = "Shipping Api", Version = "v1"
+                });
+            });
             // Add framework services.
             services.AddMvc();
         }
@@ -38,6 +43,11 @@ namespace Build2017.IoT.Hackathon
             loggerFactory.AddDebug();
 
             app.UseMvc();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs");
+            });
         }
     }
 }
