@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 namespace Build2017.IoT.Hackathon.Models
 {
     public class DeviceData : TableEntity {
-        public long MessageId { get; set; }
+        public string deviceId { get; set; }
+        public long messageId { get; set; }
 
-        public long AccX { get; set; }
-        public long AccY { get; set; }
-        public long AccZ { get; set; }
+        public long temperature { get; set; }
+        public long MinTemp { get; set; }
+        public long MaxTemp { get; set; }
+        public long humidity { get; set; }
+        public long MinHumid { get; set; }
+        public long MaxHumid { get; set; }
+        public bool Dropped { get; set; }
+        public bool TempTripped { get; set; }
+        public bool Tipped { get; set; }
 
-        public long GyrX { get; set; }
-        public long GyrY { get; set; }
-        public long GyrZ { get; set; }
-
-
-        public long Humidity { get; set; }
-        public long Temperature { get; set; }
 
     }
 }
