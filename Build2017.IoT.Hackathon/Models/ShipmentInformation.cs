@@ -9,7 +9,8 @@ namespace Build2017.IoT.Hackathon.Models
     public class ShipmentInformation : TableEntity
     {
         public string TrackerId { get; set; }
-        
+        public string TrackerName { get; set; }
+
 
         public string Name {
             get { return PartitionKey; }

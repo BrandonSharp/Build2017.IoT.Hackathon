@@ -7,6 +7,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using Build2017.IoT.Hackathon.Models;
 using System.Text;
+using Microsoft.Azure.Devices;
 
 namespace Build2017.IoT.Hackathon.Controllers
 {
@@ -38,13 +39,17 @@ namespace Build2017.IoT.Hackathon.Controllers
             CloudTable table = tableClient.GetTableReference("Shipments");
 
             shipInfo.RowKey = shipInfo.Name;
+            shipInfo.TrackerId = "0080E1B97233";
+            shipInfo.TrackerName = "tracker1";
 
             TableOperation insertOp = TableOperation.Insert(shipInfo);
             await table.ExecuteAsync(insertOp);
 
             var iotClient = Microsoft.Azure.Devices.ServiceClient.CreateFromConnectionString(iotHubConnectionstring);
-            var deviceMessage = new Microsoft.Azure.Devices.Message(Encoding.ASCII.GetBytes("StartTrackinig")) { Ack = Microsoft.Azure.Devices.DeliveryAcknowledgement.Full };
-            await iotClient.SendAsync(shipInfo.TrackerId, deviceMessage);
+
+            var methodInvocation = new CloudToDeviceMethod("StartTracking") { ResponseTimeout = TimeSpan.FromSeconds(30) };
+            methodInvocation.SetPayloadJson("{}");
+            await iotClient.InvokeDeviceMethodAsync(shipInfo.TrackerName, methodInvocation);
             return true;
         }
 
@@ -87,6 +92,16 @@ namespace Build2017.IoT.Hackathon.Controllers
                 TableQuery<DeviceData> dataquery = new TableQuery<DeviceData>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, shippingInfo.TrackerId));
                 var resultingData = dataTable.ExecuteQuery(dataquery);
                 var results = resultingData.ToList().OrderBy(x => x.Timestamp);
+
+                var details = new ShipmentDetails() {
+                    Name = shippingInfo.Name,
+                    Description = shippingInfo.Description,
+                    IsFreefallAllowed = shippingInfo.IsFreefallAllowed,
+                    IsTippingAllowed = shippingInfo.IsTippingAllowed,
+                    MaximumHumidity = shippingInfo.MaximumHumidity,
+                    MinimumHumidity = shippingInfo.MinimumHumidity,
+                    MaximumTemperature = shippingInfo.MaximumTemperature,
+                };
             } else {
                 return null;
             }
