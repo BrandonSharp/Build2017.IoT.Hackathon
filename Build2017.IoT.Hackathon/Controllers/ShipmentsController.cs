@@ -14,8 +14,8 @@ namespace Build2017.IoT.Hackathon.Controllers
     [Route("api/[controller]")]
     public class ShipmentsController : Controller
     {
-        static string iotHubConnectionstring = "HostName=bs-iot-hackathon.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=CruDa1E8fFYEuYFu2DHrzFW3rdA4IW8+jiRwD63vh6E=";
-        CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=hackathon2017;AccountKey=5LktSt6p93x66DZQQm9yMi6CgZn/8uuI+X5Hk5biSa+sNqQfmHzQHH1drT0amWCAIsP+92yiR251GGa3FE7prQ==;EndpointSuffix=core.windows.net");
+        static string iotHubConnectionstring = "HostName=<iot-hub>.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=<sas-key>";
+        CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=hackathon2017;AccountKey=<access-key>;EndpointSuffix=core.windows.net");
         public ShipmentsController() {
 
         }
